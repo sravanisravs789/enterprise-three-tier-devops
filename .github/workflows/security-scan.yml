@@ -11,7 +11,7 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v4
       - name: Run Trivy secret Scan
-        uses: aquasecurity/trivy-action@0.31.0
+        uses: aquasecurity/trivy-action@57a97c7d41f3d32cb0bf842886f4a86cf157a97c
         with:
           scan-type: 'fs'
           security-checks: 'secret'
