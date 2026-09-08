@@ -6,10 +6,10 @@ COPY package*.json ./
 
 RUN npm install --omit=dev
 
-COPY . .
-
 RUN addgroup -S appgroup && \
     adduser -S appuser -G appgroup
+
+COPY --chown=appuser:appgroup . .
 
 USER appuser
 
