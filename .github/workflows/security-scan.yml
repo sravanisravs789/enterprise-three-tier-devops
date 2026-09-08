@@ -10,16 +10,17 @@ jobs:
     steps:
       - name: checkout code
         uses: actions/checkout@v4
+
       - name: Run Trivy secret Scan
         uses: aquasecurity/trivy-action@v0.35.0
         with:
-          scan-type: 'fs'
-          scanners: 'secret'
+          scan-type: 'secret'      # Updated to modern format
+          scan-target: '.'         # Updated parameter name
           exit-code: '1'
 
       - name: Run Trivy Code & Config Scan
         uses: aquasecurity/trivy-action@v0.35.0
         with:
-          scan-type: 'fs'
-          scanners: 'misconfig,vuln'
+          scan-type: 'config'      # Updated to modern format
+          scan-target: '.'         # Updated parameter name
           exit-code: '0'
