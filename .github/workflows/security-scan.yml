@@ -1,1 +1,19 @@
+name: "Security & Code Quality Scan"
 
+on:
+   push:
+      branches: [ "main" ]
+
+jobs:
+  static-security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: action/checkout@v4
+      - name: Run Trivy secret Scan
+        uses: aquasec/trivy-action@master
+        with:
+          scan-type: 'fs'
+          security-checks: 'secret'
+          exit-code: '1'
+      
