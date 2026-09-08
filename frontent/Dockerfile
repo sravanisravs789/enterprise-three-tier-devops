@@ -1,11 +1,23 @@
 FROM nginx:alpine
 
-COPY index.html /usr/share/nginx/html/
-COPY app.js /usr/share/nginx/html/
-COPY style.css /usr/share/nginx/html/
+# Step 1: Grant permissions on internal Nginx directories to the default unprivileged 'nginx' user
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx && \
+    chown -R nginx:nginx /etc/nginx/conf.d && \
+    touch /var/run/nginx.pid && \
+    chown -R nginx:nginx /var/run/nginx.pid
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Step 2: Drop root capabilities and switch down to the non-root 'nginx' user
+USER nginx
 
-EXPOSE 80
+# Step 3: Copy files securely matching the non-root owner profile
+COPY --chown=nginx:nginx index.html /usr/share/nginx/html/
+COPY --chown=nginx:nginx app.js /usr/share/nginx/html/
+COPY --chown=nginx:nginx style.css /usr/share/nginx/html/
+COPY --chown=nginx:nginx nginx.conf /etc/nginx/conf.d/default.conf
+
+
+EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]
