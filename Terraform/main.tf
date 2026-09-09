@@ -74,6 +74,21 @@ resource "azurerm_subnet_network_security_group_association" "nsg_assoc" {
   network_security_group_id = azurerm_network_security_group.devops_nsg.id
 }
 
+
+
+
+# 🔵 AZURE SPECIFICATION
+resource "azurerm_linux_virtual_machine" "devops_vm" {
+  name                = "devops-production-server"
+  resource_group_name = "enterprise-devops-rg"
+  location            = "East US"
+  size                = "Standard_B2s" # Free credit compliant size (4GB RAM)
+  admin_username      = "azureuser"
+
+  network_interface_ids = [
+    azurerm_network_interface.devops_nic.id,
+  ]
+
 # 7. Allocate a Dedicated Public IP Address Object
 resource "azurerm_public_ip" "devops_pip" {
   name                = "devops-server-ip"
@@ -95,19 +110,6 @@ resource "azurerm_network_interface" "devops_nic" {
     public_ip_address_id          = azurerm_public_ip.devops_pip.id
   }
 }
-
-
-# 🔵 AZURE SPECIFICATION
-resource "azurerm_linux_virtual_machine" "devops_vm" {
-  name                = "devops-production-server"
-  resource_group_name = "enterprise-devops-rg"
-  location            = "East US"
-  size                = "Standard_B2s" # Free credit compliant size (4GB RAM)
-  admin_username      = "azureuser"
-
-  network_interface_ids = [
-    azurerm_network_interface.devops_nic.id,
-  ]
 
   # Provision an Ubuntu 22.04 LTS OS image
   source_image_reference {
