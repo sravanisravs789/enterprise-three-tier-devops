@@ -123,4 +123,3 @@ resource "azurerm_linux_virtual_machine" "devops_vm" {
     public_key = file("~/.ssh/id_rsa.pub")
   }
 }
-EOF
