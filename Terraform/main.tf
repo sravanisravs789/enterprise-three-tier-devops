@@ -73,3 +73,35 @@ resource "azurerm_subnet_network_security_group_association" "nsg_assoc" {
   subnet_id                 = azurerm_subnet.devops_subnet.id
   network_security_group_id = azurerm_network_security_group.devops_nsg.id
 }
+
+# 🔵 AZURE SPECIFICATION
+resource "azurerm_linux_virtual_machine" "devops_vm" {
+  name                = "devops-production-server"
+  resource_group_name = "enterprise-devops-rg"
+  location            = "East US"
+  size                = "Standard_B2s" # Free credit compliant size (4GB RAM)
+  admin_username      = "azureuser"
+
+  network_interface_ids = [
+    azurerm_network_interface.devops_nic.id,
+  ]
+
+  # Provision an Ubuntu 22.04 LTS OS image
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
+    version   = "latest"
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS" # Standard HDD/SSD to conserve credits
+  }
+
+  # Configures password-less SSH access using a local key file
+  admin_ssh_key {
+    username   = "azureuser"
+    public_key = file("~/.ssh/id_rsa.pub")
+  }
+}
