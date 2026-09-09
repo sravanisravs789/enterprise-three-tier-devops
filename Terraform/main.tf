@@ -74,6 +74,29 @@ resource "azurerm_subnet_network_security_group_association" "nsg_assoc" {
   network_security_group_id = azurerm_network_security_group.devops_nsg.id
 }
 
+# 7. Allocate a Dedicated Public IP Address Object
+resource "azurerm_public_ip" "devops_pip" {
+  name                = "devops-server-ip"
+  location            = azurerm_resource_group.devops_rg.location
+  resource_group_name = azurerm_resource_group.devops_rg.name
+  allocation_method   = "Dynamic"
+}
+
+# 8. Provision the Virtual Network Interface Card (NIC)
+resource "azurerm_network_interface" "devops_nic" {
+  name                = "devops-server-nic"
+  location            = azurerm_resource_group.devops_rg.location
+  resource_group_name = azurerm_resource_group.devops_rg.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.devops_subnet.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.devops_pip.id
+  }
+}
+
+
 # 🔵 AZURE SPECIFICATION
 resource "azurerm_linux_virtual_machine" "devops_vm" {
   name                = "devops-production-server"
