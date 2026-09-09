@@ -1,3 +1,4 @@
+
 # 1. Define the Microsoft Azure Provider version mapping
 terraform {
   required_providers {
@@ -26,7 +27,6 @@ resource "azurerm_virtual_network" "devops_vnet" {
   resource_group_name = azurerm_resource_group.devops_rg.name
 }
 
-
 # 4. Carve out a Public Subnet for our Compute Tier
 resource "azurerm_subnet" "devops_subnet" {
   name                 = "devops-public-subnet"
@@ -41,7 +41,6 @@ resource "azurerm_network_security_group" "devops_nsg" {
   location            = azurerm_resource_group.devops_rg.location
   resource_group_name = azurerm_resource_group.devops_rg.name
 
-  # Rule A: Open SSH access strictly for your management terminal
   security_rule {
     name                       = "Allow-SSH"
     priority                   = 100
@@ -50,11 +49,10 @@ resource "azurerm_network_security_group" "devops_nsg" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "22"
-    source_address_prefix      = "*" # In production, pin this to your specific home IP!
+    source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
 
-  # Rule B: Open port 8080 for your Web Frontend application container
   security_rule {
     name                       = "Allow-Frontend-8080"
     priority                   = 110
@@ -73,21 +71,6 @@ resource "azurerm_subnet_network_security_group_association" "nsg_assoc" {
   subnet_id                 = azurerm_subnet.devops_subnet.id
   network_security_group_id = azurerm_network_security_group.devops_nsg.id
 }
-
-
-
-
-# 🔵 AZURE SPECIFICATION
-resource "azurerm_linux_virtual_machine" "devops_vm" {
-  name                = "devops-production-server"
-  resource_group_name = "enterprise-devops-rg"
-  location            = "East US"
-  size                = "Standard_B2s" # Free credit compliant size (4GB RAM)
-  admin_username      = "azureuser"
-
-  network_interface_ids = [
-    azurerm_network_interface.devops_nic.id,
-  ]
 
 # 7. Allocate a Dedicated Public IP Address Object
 resource "azurerm_public_ip" "devops_pip" {
@@ -111,7 +94,18 @@ resource "azurerm_network_interface" "devops_nic" {
   }
 }
 
-  # Provision an Ubuntu 22.04 LTS OS image
+# 9. Provision the Linux Virtual Machine Server Instance
+resource "azurerm_linux_virtual_machine" "devops_vm" {
+  name                = "devops-production-server"
+  resource_group_name = "enterprise-devops-rg"
+  location            = "East US"
+  size                = "Standard_B2s"
+  admin_username      = "azureuser"
+
+  network_interface_ids = [
+    azurerm_network_interface.devops_nic.id,
+  ]
+
   source_image_reference {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-jammy"
@@ -121,12 +115,12 @@ resource "azurerm_network_interface" "devops_nic" {
 
   os_disk {
     caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS" # Standard HDD/SSD to conserve credits
+    storage_account_type = "Standard_LRS"
   }
 
-  # Configures password-less SSH access using a local key file
   admin_ssh_key {
     username   = "azureuser"
     public_key = file("~/.ssh/id_rsa.pub")
   }
 }
+EOF
